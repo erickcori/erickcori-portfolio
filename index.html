@@ -7,10 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <style>
     body {
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
       background-color: #0d1117;
       color: #c9d1d9;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      line-height: 1.6;
+      padding-bottom: 4rem;
     }
 
     header {
@@ -23,7 +25,7 @@
       height: auto;
       display: block;
       object-fit: contain;
-      animation: subtleZoom 10s ease-in-out infinite alternate;
+      animation: subtleZoom 5s ease-in-out infinite alternate;
     }
 
     @keyframes subtleZoom {
@@ -35,112 +37,97 @@
       }
     }
 
-    main {
-      background-color: #f9f9f9; /* FONDO CLARO */
-      color: #1c1c1c;             /* texto oscuro */
-      max-width: 960px;
-      margin: -2rem auto 4rem auto;
-      padding: 3rem;
-      border-top-left-radius: 2rem;
-      border-top-right-radius: 2rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    section {
+      max-width: 900px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
     }
 
     h2 {
-      color: #003366;
-      border-bottom: 2px solid #ccc;
+      color: #58a6ff;
+      border-bottom: 1px solid #30363d;
       padding-bottom: 0.3rem;
-      margin-top: 2rem;
-    }
-
-    section {
-      margin-bottom: 2.5rem;
-    }
-
-    p {
-      margin-bottom: 1rem;
     }
 
     ul {
+      list-style-type: disc;
       padding-left: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    li {
-      margin-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
     }
 
     a {
-      color: #0056b3;
+      color: #58a6ff;
       text-decoration: none;
     }
 
     a:hover {
       text-decoration: underline;
     }
+
+    p {
+      margin-bottom: 1.2rem;
+    }
   </style>
 </head>
 <body>
-
   <header>
     <img src="Webp.net-resizeimage.png" alt="Erick Corimanya Banner" />
   </header>
 
-  <main>
-    <section>
-      <h2>About Me</h2>
-      <p>
-        I’m Erick Mauricio Corimanya, a Peruvian chemical engineer based in Brazil, with a strong background in water and sanitation systems, sustainability, and environmental engineering.
-      </p>
-      <ul>
-        <li>MSc in Water, Sanitation & Health Engineering – University of Leeds (UK)</li>
-        <li>MSc in Sustainability – University of São Paulo (USP, Brazil)</li>
-        <li>Former consultant for Hydroconseil (France) and the Inter-American Development Bank (IDB)</li>
-        <li>Former lecturer in Wastewater Treatment – National University of Callao (Peru)</li>
-        <li>10+ years of experience in water & sanitation projects across Latin America</li>
-      </ul>
-    </section>
+  <section>
+    <h2>About Me</h2>
+    <p>
+      I’m Erick Mauricio Corimanya, a Peruvian chemical engineer based in Brazil, with a strong background in water and sanitation systems, sustainability, and environmental engineering.
+    </p>
+    <ul>
+      <li>MSc in Water, Sanitation & Health Engineering – University of Leeds (UK)</li>
+      <li>MSc in Sustainability – University of São Paulo (USP, Brazil)</li>
+      <li>Former consultant for Hydroconseil (France) and the Inter-American Development Bank (IDB)</li>
+      <li>Former lecturer in Wastewater Treatment – National University of Callao (Peru)</li>
+      <li>10+ years of experience in water & sanitation projects across Latin America</li>
+    </ul>
+  </section>
 
-    <section>
-      <h2>Research Focus (PhD)</h2>
-      <p><strong>Project Title:</strong><br>
-        Multi-objective Optimization of Wastewater Treatment Plants Using Reinforcement Learning: A Simulation-Based and Sustainability-Oriented Approach.</p>
-      <p>
-        Applying AI (Reinforcement Learning) to improve energy efficiency, effluent quality, and reduce emissions in WWTPs — especially in developing countries.
-      </p>
-    </section>
+  <section>
+    <h2>Research Focus (PhD)</h2>
+    <p><strong>Project Title:</strong><br>
+    Multi-objective Optimization of Wastewater Treatment Plants Using Reinforcement Learning: A Simulation-Based and Sustainability-Oriented Approach.
+    </p>
+    <p>
+      Applying AI (Reinforcement Learning) to improve energy efficiency, effluent quality, and reduce emissions in WWTPs — especially in developing countries.
+    </p>
+  </section>
 
-    <section>
-      <h2>Featured Projects</h2>
-      <ul>
-        <li><strong><a href="#">RL-ETAR-BSM1</a></strong> – Optimization of wastewater plants using Reinforcement Learning</li>
-        <li><strong><a href="#">WQI</a></strong> – Water Quality Index for Indian rivers</li>
-        <li><strong><a href="#">Pytorch-Tutorial</a></strong> – Neural network experiments</li>
-        <li><strong><a href="#">erickcori-portfolio</a></strong> – This portfolio and landing page</li>
-      </ul>
-    </section>
+  <section>
+    <h2>Featured Projects</h2>
+    <ul>
+      <li><strong><a href="#">RL-ETAR-BSM1</a></strong> – Optimization of wastewater plants using Reinforcement Learning</li>
+      <li><strong><a href="#">WQI</a></strong> – Water Quality Index for Indian rivers</li>
+      <li><strong><a href="#">Pytorch-Tutorial</a></strong> – Neural network experiments</li>
+      <li><strong><a href="#">erickcori-portfolio</a></strong> – This portfolio and landing page</li>
+    </ul>
+  </section>
 
-    <section>
-      <h2>Research Interests</h2>
-      <ul>
-        <li>Wastewater treatment technologies</li>
-        <li>Reinforcement learning for environmental applications</li>
-        <li>Multi-objective optimization</li>
-        <li>Sustainability and resilient infrastructure</li>
-        <li>Public water and sanitation systems</li>
-      </ul>
-    </section>
+  <section>
+    <h2>Research Interests</h2>
+    <ul>
+      <li>Wastewater treatment technologies</li>
+      <li>Reinforcement learning for environmental applications</li>
+      <li>Multi-objective optimization</li>
+      <li>Sustainability and resilient infrastructure</li>
+      <li>Public water and sanitation systems</li>
+    </ul>
+  </section>
 
-    <section>
-      <h2>How to Reach Me</h2>
-      <ul>
-        <li>ORCID: <a href="https://orcid.org/0000-0003-0193-9514" target="_blank">0000-0003-0193-9514</a></li>
-        <li>LinkedIn: <a href="https://www.linkedin.com/in/mcorimanya" target="_blank">mcorimanya</a></li>
-        <li>Email: <a href="mailto:erickcorimanya2020@gmail.com">erickcorimanya2020@gmail.com</a></li>
-        <li>Location: São Paulo, Brazil</li>
-      </ul>
-    </section>
-  </main>
-
+  <section>
+    <h2>How to Reach Me</h2>
+    <ul>
+      <li>ORCID: <a href="https://orcid.org/0000-0003-0193-9514" target="_blank">0000-0003-0193-9514</a></li>
+      <li>LinkedIn: <a href="https://www.linkedin.com/in/mcorimanya" target="_blank">mcorimanya</a></li>
+      <li>Email: <a href="mailto:erickcorimanya2020@gmail.com">erickcorimanya2020@gmail.com</a></li>
+      <li>Location: São Paulo, Brazil</li>
+    </ul>
+    <p>Thanks for visiting! Feel free to explore my work or reach out for collaborations in environmental research, sustainability, or digital solutions for water systems.</p>
+  </section>
 </body>
 </html>

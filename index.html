@@ -22,30 +22,27 @@
       animation: zoomBanner 20s ease-in-out infinite alternate;
   object-fit: cover;
     }
-   header {
+ header {
   height: 400px;
   overflow: hidden;
   position: relative;
 }
 
 header img {
-  width: 100%;
+  width: 110%;
   height: auto;
   display: block;
-  animation: smoothZoom 20s ease-in-out infinite alternate;
+  animation: panImage 30s linear infinite alternate;
   transform-origin: center;
   object-fit: cover;
-  filter: brightness(0.9);
 }
 
-@keyframes smoothZoom {
+@keyframes panImage {
   0% {
-    transform: scale(1);
-    filter: brightness(0.9) blur(0px);
+    transform: translateX(0);
   }
   100% {
-    transform: scale(1.1);
-    filter: brightness(1.1) blur(1.5px);
+    transform: translateX(-5%);
   }
 }
 

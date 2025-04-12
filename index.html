@@ -19,7 +19,18 @@
       width: 100%;
       height: auto;
       display: block;
+      animation: zoomBanner 20s ease-in-out infinite alternate;
+  object-fit: cover;
     }
+
+@keyframes zoomBanner {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
 
     section {
       max-width: 900px;

@@ -22,17 +22,30 @@
       animation: zoomBanner 20s ease-in-out infinite alternate;
   object-fit: cover;
     }
-    header {
+   header {
   height: 400px;
   overflow: hidden;
+  position: relative;
 }
 
-@keyframes zoomBanner {
+header img {
+  width: 100%;
+  height: auto;
+  display: block;
+  animation: smoothZoom 20s ease-in-out infinite alternate;
+  transform-origin: center;
+  object-fit: cover;
+  filter: brightness(0.9);
+}
+
+@keyframes smoothZoom {
   0% {
     transform: scale(1);
+    filter: brightness(0.9) blur(0px);
   }
   100% {
     transform: scale(1.1);
+    filter: brightness(1.1) blur(1.5px);
   }
 }
 

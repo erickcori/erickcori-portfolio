@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Erick Corimanya | GitHub Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>Erick Corimanya | Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <style>
     body {
       background-color: #0d1117;
@@ -15,29 +15,27 @@
       padding-bottom: 4rem;
     }
 
-   header {
-  position: relative;
-  width: 100%;
-  height: auto;
-}
+    header {
+      width: 100%;
+      overflow: hidden;
+    }
 
-header img {
-  width: 100%;
-  height: auto;
-  display: block;
-  animation: bannerZoom 25s ease-in-out infinite alternate;
-  transform-origin: center center;
-  object-fit: cover;
-}
+    header img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      animation: subtleZoom 15s ease-in-out infinite alternate;
+    }
 
-@keyframes bannerZoom {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.07);
-  }
-}
+    @keyframes subtleZoom {
+      0% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(1.03);
+      }
+    }
 
     section {
       max-width: 900px;
@@ -52,7 +50,9 @@ header img {
     }
 
     ul {
-      padding-left: 1.2rem;
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin-bottom: 1.5rem;
     }
 
     a {
@@ -64,19 +64,12 @@ header img {
       text-decoration: underline;
     }
 
-    .project-title {
-      font-weight: bold;
-      color: #ffffff;
-    }
-
-    .highlight {
-      font-weight: bold;
-      color: #e6edf3;
+    p {
+      margin-bottom: 1.2rem;
     }
   </style>
 </head>
 <body>
-
   <header>
     <img src="Webp.net-resizeimage.png" alt="Erick Corimanya Banner" />
   </header>
@@ -97,9 +90,8 @@ header img {
 
   <section>
     <h2>Research Focus (PhD)</h2>
-    <p class="project-title">Project Title:</p>
-    <p>
-      Multi-objective Optimization of Wastewater Treatment Plants Using Reinforcement Learning: A Simulation-Based and Sustainability-Oriented Approach.
+    <p><strong>Project Title:</strong><br>
+    Multi-objective Optimization of Wastewater Treatment Plants Using Reinforcement Learning: A Simulation-Based and Sustainability-Oriented Approach.
     </p>
     <p>
       Applying AI (Reinforcement Learning) to improve energy efficiency, effluent quality, and reduce emissions in WWTPs — especially in developing countries.
@@ -109,10 +101,10 @@ header img {
   <section>
     <h2>Featured Projects</h2>
     <ul>
-      <li><a href="#">RL-ETAR-BSM1</a> – Optimization of wastewater plants using Reinforcement Learning</li>
-      <li><a href="#">WQI</a> – Water Quality Index for Indian rivers</li>
-      <li><a href="#">Pytorch-Tutorial</a> – Neural network experiments</li>
-      <li><a href="#">erickcori-portfolio</a> – This portfolio and landing page</li>
+      <li><strong><a href="#">RL-ETAR-BSM1</a></strong> – Optimization of wastewater plants using Reinforcement Learning</li>
+      <li><strong><a href="#">WQI</a></strong> – Water Quality Index for Indian rivers</li>
+      <li><strong><a href="#">Pytorch-Tutorial</a></strong> – Neural network experiments</li>
+      <li><strong><a href="#">erickcori-portfolio</a></strong> – This portfolio and landing page</li>
     </ul>
   </section>
 
@@ -130,13 +122,12 @@ header img {
   <section>
     <h2>How to Reach Me</h2>
     <ul>
-      <li>Email: <a href="mailto:erickcorimanya2020@gmail.com">erickcorimanya2020@gmail.com</a></li>
-      <li>LinkedIn: <a href="https://www.linkedin.com/in/mcorimanya" target="_blank">mcorimanya</a></li>
       <li>ORCID: <a href="https://orcid.org/0000-0003-0193-9514" target="_blank">0000-0003-0193-9514</a></li>
+      <li>LinkedIn: <a href="https://www.linkedin.com/in/mcorimanya" target="_blank">mcorimanya</a></li>
+      <li>Email: <a href="mailto:erickcorimanya2020@gmail.com">erickcorimanya2020@gmail.com</a></li>
       <li>Location: São Paulo, Brazil</li>
     </ul>
     <p>Thanks for visiting! Feel free to explore my work or reach out for collaborations in environmental research, sustainability, or digital solutions for water systems.</p>
   </section>
-
 </body>
 </html>

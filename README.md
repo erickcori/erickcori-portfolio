@@ -3,6 +3,11 @@
 I’m **Erick Mauricio Corimanya**, a Peruvian chemical engineer based in Brazil, with a strong background in water and sanitation systems, sustainability, and environmental engineering.
 
 ---
+## 🌐 My Portfolio Website
+
+Check it out here 👉 [https://erickcori.github.io/erickcori-portfolio/](https://erickcori.github.io/erickcori-portfolio/)
+
+---
 
 ## 🧠 About Me
 

@@ -1,154 +1,413 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Erick Corimanya | Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      background-color: #0d1117;
-      color: #c9d1d9;
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      line-height: 1.6;
-      padding-bottom: 4rem;
+# Decision Support System: Systemic Barrier Analysis
+
+# Importar librerías
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+import plotly.express as px
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from dash import Dash, dcc, html, Input, Output, dash_table, callback
+import dash_bootstrap_components as dbc
+
+# ========== DATOS ==========
+data = {
+    "Barrier": ['A1', 'A2', 'I1', 'I2', 'G1', 'G2', 'G4', 'G5', 'I5', 'F1', 'S1', 'S2'],
+    "SHAP": [0.383, 0.383, 0.404, 0.387, 0.476, 0.454, 0.426, 0.694, 0.506, 0.481, 0.392, 0.421],
+    "Out_Degree": [8.91, 4.00, 9.01, 11.33, 2.91, 12.25, 5.41, 16.93, 13.26, 11.73, 3.91, 3.55],
+    "Betweenness": [0.114, 0.033, 0.039, 0.071, 0.026, 0.093, 0.005, 0.392, 0.026, 0.013, 0.133, 0.065]
+}
+df = pd.DataFrame(data)
+
+# Matriz de impacto cruzado del paper
+barriers = ['A1', 'A2', 'I1', 'I2', 'G1', 'G2', 'G4', 'G5', 'I5', 'F1', 'S1', 'S2']
+cross_impact = np.array([
+    [0.0, 2.46, 1.92, 0.0, 0.0, 0.0, 0.0, 2.15, 2.38, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.31, 1.69],
+    [1.67, 2.17, 0.0, 0.0, 1.75, 0.0, 0.0, 0.0, 0.0, 0.0, 2.17, 1.25],
+    [2.5, 2.5, 2.58, 0.0, 2.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5],
+    [1.58, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.33, 0.0],
+    [2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.58, 2.5, 2.25, 0.0, 1.92],
+    [0.0, 0.0, 0.0, 1.83, 1.58, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0],
+    [2.25, 2.25, 2.17, 2.17, 1.92, 2.08, 1.92, 0.0, 2.17, 0.0, 0.0, 0.0],
+    [2.17, 2.42, 2.25, 0.0, 2.25, 0.0, 2.0, 2.17, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 2.67, 2.75, 2.5, 2.36, 0.0, 0.0, 0.0, 0.0, 0.0, 1.45, 0.0],
+    [0.0, 0.0, 0.0, 1.73, 0.0, 0.0, 0.0, 2.18, 0.0, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.82, 0.0, 0.0, 1.73, 0.0],
+])
+df_matrix = pd.DataFrame(cross_impact, index=barriers, columns=barriers)
+
+# ========== FUNCIONES ANALÍTICAS ==========
+def calculate_composite_score(df, weights=None):
+    """Calculate composite score using min-max normalization"""
+    if weights is None:
+        weights = {'SHAP': 0.5, 'Out_Degree': 0.3, 'Betweenness': 0.2}
+    scaler = MinMaxScaler()
+    df_norm = df.copy()
+    for col in ['SHAP', 'Out_Degree', 'Betweenness']:
+        df_norm[col] = scaler.fit_transform(df[[col]])
+    df['Composite_Score'] = (
+        weights['SHAP'] * df_norm['SHAP'] +
+        weights['Out_Degree'] * df_norm['Out_Degree'] +
+        weights['Betweenness'] * df_norm['Betweenness']
+    )
+    return df
+
+def perform_clustering(df):
+    """Perform PCA and K-Means clustering directly from cross-impact matrix"""
+    X_scaled = StandardScaler().fit_transform(cross_impact)
+    pca = PCA(n_components=2)
+    pca_result = pca.fit_transform(X_scaled)
+
+    kmeans = KMeans(n_clusters=3, random_state=42)
+    clusters = kmeans.fit_predict(X_scaled)
+
+    df['PCA1'] = pca_result[:, 0]
+    df['PCA2'] = pca_result[:, 1]
+    df['Cluster'] = clusters
+    df['Cluster_Name'] = df['Cluster'].map({
+        0: 'Structural Enablers',
+        1: 'Peripheral Triggers',
+        2: 'Context-Dependent Obstacles'
+    })
+    return df
+
+def simulate_removal(df, barrier_to_remove):
+    """Simulate barrier removal"""
+    df_sim = df.copy()
+    if barrier_to_remove:
+        df_sim.loc[df_sim['Barrier'] == barrier_to_remove, ['SHAP', 'Out_Degree', 'Betweenness']] = 0
+    return df_sim
+
+# Inicialización inicial
+df = calculate_composite_score(df)
+df = perform_clustering(df)
+
+# ========== APLICACIÓN DASH ==========
+app = Dash(__name__, external_stylesheets=[dbc.themes.MINTY])
+
+app.layout = dbc.Container([
+    # Encabezado
+    dbc.Row([
+        dbc.Col(html.H1("Decision Support System: Systemic Barrier Analysis", className="text-center my-4"), width=12)
+    ]),
+    # Descripción
+    dbc.Row([
+        dbc.Col(html.P("""Interactive dashboard for barrier prioritization based on systemic influence (SHAP), network centrality, and cluster analysis.""",
+                       className="text-center text-muted mb-4"), width=12)
+    ]),
+    # Controles
+    dbc.Row([
+        dbc.Col([
+            html.H5("Weight Configuration", className="mb-3"),
+            dbc.Label("SHAP Weight (Systemic Influence):", className="font-weight-bold"),
+            dcc.Slider(id='shap-weight', min=0, max=1, step=0.1, value=0.5,
+                       marks={i / 10: str(i / 10) for i in range(0, 11)}),
+            dbc.Label("Out-Degree Weight (Network Centrality):", className="font-weight-bold mt-3"),
+            dcc.Slider(id='outdegree-weight', min=0, max=1, step=0.1, value=0.3,
+                       marks={i / 10: str(i / 10) for i in range(0, 11)}),
+            dbc.Label("Betweenness Weight (Mediation Role):", className="font-weight-bold mt-3"),
+            dcc.Slider(id='betweenness-weight', min=0, max=1, step=0.1, value=0.2,
+                       marks={i / 10: str(i / 10) for i in range(0, 11)})
+        ], md=4),
+        dbc.Col([
+            html.H5("What-If Simulation", className="mb-3"),
+            dbc.Label("Select a barrier to simulate its removal:", className="font-weight-bold"),
+            dcc.Dropdown(
+                id='barrier-dropdown',
+                options=[{'label': b, 'value': b} for b in df['Barrier']],
+                value=None,
+                placeholder="Select a barrier...",
+                clearable=True
+            ),
+            html.Div(id='simulation-summary', className="mt-3 p-3 bg-light rounded")
+        ], md=4),
+        dbc.Col([
+            html.H5("Filters", className="mb-3"),
+            dbc.Label("Filter by Cluster:", className="font-weight-bold"),
+            dcc.Dropdown(
+                id='cluster-filter',
+                options=[{'label': c, 'value': c} for c in df['Cluster'].unique()],
+                value=None,
+                placeholder="All clusters",
+                multi=True
+            ),
+            dbc.Label("Sort by:", className="font-weight-bold mt-3"),
+            dcc.Dropdown(
+                id='sort-by',
+                options=[
+                    {'label': 'Composite Score', 'value': 'Composite_Score'},
+                    {'label': 'SHAP', 'value': 'SHAP'},
+                    {'label': 'Out-Degree', 'value': 'Out_Degree'},
+                    {'label': 'Betweenness', 'value': 'Betweenness'}
+                ],
+                value='Composite_Score'
+            )
+        ], md=4)
+    ], className="mb-4"),
+
+    # Pestañas
+    dbc.Tabs([
+        dbc.Tab([
+            dbc.Row([
+                dbc.Col(
+                    dash_table.DataTable(
+                        id='ranking-table',
+                        columns=[
+                            {"name": "Barrier", "id": "Barrier"},
+                            {"name": "SHAP", "id": "SHAP", "format": {"specifier": ".3f"}},
+                            {"name": "Out-Degree", "id": "Out_Degree", "format": {"specifier": ".2f"}},
+                            {"name": "Betweenness", "id": "Betweenness", "format": {"specifier": ".4f"}},
+                            {"name": "Composite Score", "id": "Composite_Score", "format": {"specifier": ".3f"}},
+                            {"name": "Cluster", "id": "Cluster"}
+                        ],
+                        style_table={'overflowX': 'auto'},
+                        style_header={
+                            'backgroundColor': 'rgb(230, 230, 230)',
+                            'fontWeight': 'bold',
+                            'textAlign': 'center'
+                        },
+                        style_cell={
+                            'textAlign': 'center',
+                            'padding': '8px'
+                        },
+                        style_data_conditional=[
+                            {
+                                'if': {'row_index': 'odd'},
+                                'backgroundColor': 'rgb(248, 248, 248)'
+                            },
+                            {
+                                'if': {'column_id': 'Composite_Score', 'filter_query': '{Composite_Score} > 0.7'},
+                                'backgroundColor': '#d4edda',
+                                'fontWeight': 'bold'
+                            }
+                        ],
+                        sort_action="native",
+                        sort_mode="single",
+                        filter_action="native",
+                        page_size=12
+                    ),
+                    width=12
+                )
+            ])
+        ], label="Barrier Ranking"),
+        dbc.Tab([
+            dbc.Row([
+                dbc.Col(dcc.Graph(id='pca-plot'), width=8),
+                dbc.Col([
+                    html.H5("Cluster Description", className="mb-3"),
+                    html.Div(id='cluster-description', className="p-3 bg-light rounded")
+                ], width=4)
+            ])
+        ], label="Typology Explorer"),
+        dbc.Tab([
+            dbc.Row([
+                dbc.Col(dcc.Graph(id='impact-plot'), width=12)
+            ]),
+            dbc.Row([
+                dbc.Col(
+                    dash_table.DataTable(
+                        id='impact-table',
+                        columns=[
+                            {"name": "Barrier", "id": "Barrier"},
+                            {"name": "Original Score", "id": "Original", "format": {"specifier": ".3f"}},
+                            {"name": "New Score", "id": "New", "format": {"specifier": ".3f"}},
+                            {"name": "Change", "id": "Change", "format": {"specifier": ".2%"}}
+                        ],
+                        style_table={'overflowX': 'auto'},
+                        style_header={
+                            'backgroundColor': 'rgb(230, 230, 230)',
+                            'fontWeight': 'bold',
+                            'textAlign': 'center'
+                        },
+                        style_cell={
+                            'textAlign': 'center',
+                            'padding': '8px'
+                        },
+                        style_data_conditional=[
+                            {
+                                'if': {'column_id': 'Change', 'filter_query': '{Change} > 0'},
+                                'color': 'green'
+                            },
+                            {
+                                'if': {'column_id': 'Change', 'filter_query': '{Change} < 0'},
+                                'color': 'red'
+                            }
+                        ]
+                    ), width=12)
+            ])
+        ], label="Impact Simulator")
+    ]),
+
+    # Notas al pie
+    dbc.Row([
+        dbc.Col(
+            html.P("""
+                Note: The composite score combines systemic influence (SHAP), centrality (Out-Degree),
+                and mediation role (Betweenness) using the specified weights. Clusters were identified
+                using K-means (k=3) on the PCA space from the cross-impact matrix.
+            """, className="small text-muted mt-4"),
+            width=12
+        )
+    ])
+], fluid=True, style={"color": "#000"})
+
+# ========== CALLBACKS ==========
+@callback(
+    Output('ranking-table', 'data'),
+    Output('pca-plot', 'figure'),
+    Output('impact-plot', 'figure'),
+    Output('impact-table', 'data'),
+    Output('simulation-summary', 'children'),
+    Output('cluster-description', 'children'),
+    Input('shap-weight', 'value'),
+    Input('outdegree-weight', 'value'),
+    Input('betweenness-weight', 'value'),
+    Input('barrier-dropdown', 'value'),
+    Input('cluster-filter', 'value'),
+    Input('sort-by', 'value')
+)
+def update_dashboard(shap_w, out_w, bet_w, barrier_removed, clusters, sort_by):
+    total = shap_w + out_w + bet_w
+    weights = {
+        'SHAP': shap_w / total,
+        'Out_Degree': out_w / total,
+        'Betweenness': bet_w / total
     }
 
-    header {
-      width: 100%;
-      overflow: hidden;
-    }
+    df_sim = simulate_removal(df, barrier_removed)
+    df_sim = calculate_composite_score(df_sim, weights)
 
-    header img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
-      animation: subtleZoom 5s ease-in-out infinite alternate;
-    }
+    if clusters:
+        if isinstance(clusters, str):
+            clusters = [clusters]
+        df_sim = df_sim[df_sim['Cluster'].isin(clusters)]
 
-    @keyframes subtleZoom {
-      0% {
-        transform: scale(1);
-      }
-      100% {
-        transform: scale(1.03);
-      }
-    }
+    df_sorted = df_sim.sort_values(by=sort_by, ascending=False)
 
-    section {
-      max-width: 900px;
-      margin: 3rem auto;
-      padding: 0 1.5rem;
-    }
+    # Definir colores y nombres de clusters
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c']  # Azul, Naranja, Verde
+    cluster_names = {0: 'Structural Enablers', 1: 'Peripheral Triggers', 2: 'Context-Dependent Obstacles'}
 
-    h2 {
-      color: #58a6ff;
-      border-bottom: 1px solid #30363d;
-      padding-bottom: 0.3rem;
-    }
+    shown_clusters = set()
+    pca_fig = go.Figure()
 
-    ul {
-      list-style-type: disc;
-      padding-left: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
+    for i, row in df_sim.iterrows():
+        cluster_id = int(row['Cluster'])
+        cluster_name = cluster_names[cluster_id]
+        pca_fig.add_trace(go.Scatter(
+            x=[row['PCA1']],
+            y=[row['PCA2']],
+            mode='markers+text',
+            marker=dict(
+                size=8,
+                color=colors[cluster_id],
+                line=dict(width=1, color='black'),
+                opacity=0.9
+            ),
+            text=row['Barrier'],
+            textposition='top center',
+            name=cluster_name,
+            legendgroup=cluster_name,
+            showlegend=cluster_name not in shown_clusters,
+            hoverinfo='text',
+            hovertext=f"Barrier: {row['Barrier']}<br>"
+                      f"Cluster: {cluster_name}<br>"
+                      f"SHAP: {row['SHAP']:.3f}<br>"
+                      f"Out-Degree: {row['Out_Degree']:.2f}<br>"
+                      f"Betweenness: {row['Betweenness']:.4f}<br>"
+                      f"Composite Score: {row['Composite_Score']:.3f}"
+        ))
+        shown_clusters.add(cluster_name)
 
-    a {
-      color: #58a6ff;
-      text-decoration: none;
-    }
+    # Layout del gráfico PCA
+    pca_fig.update_layout(
+        title="Barrier Typology Space (PCA from Cross-Impact Matrix)",
+        xaxis_title="Principal Component 1",
+        yaxis_title="Principal Component 2",
+        showlegend=True,
+        legend_title_text="Clusters",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        plot_bgcolor='rgba(240,240,240,0.8)',
+        paper_bgcolor='white'
+    )
 
-    a:hover {
-      text-decoration: underline;
-    }
+    pca_fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='lightgray', zeroline=False)
+    pca_fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='lightgray', zeroline=False)
 
-    p {
-      margin-bottom: 1.2rem;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <img src="Webp.net-resizeimage.png" alt="Erick Corimanya Banner" />
-  </header>
+    # Impacto si se elimina una barrera
+    if barrier_removed:
+        df_impact = df.copy()
+        df_impact = calculate_composite_score(df_impact, weights)
+        df_impact = df_impact.merge(
+            df_sim[['Barrier', 'Composite_Score']],
+            on='Barrier',
+            suffixes=('_original', '_new')
+        )
+        df_impact['Change'] = (df_impact['Composite_Score_new'] - df_impact['Composite_Score_original']) / df_impact['Composite_Score_original']
+        df_impact = df_impact.sort_values(by='Change', key=lambda x: abs(x), ascending=False)
 
-  <section>
-    <h2>About Me</h2>
-    <p>
-      I’m Erick Mauricio Corimanya, a Peruvian chemical engineer based in Brazil, with a strong background in water and sanitation systems, sustainability, and environmental engineering.
-    </p>
-    <ul>
-      <li>BSc in Chemical Engineering – National University of San Antonio Abad de Cusco (Peru)</li>
-      <li>MSc in Water, Sanitation & Health Engineering – University of Leeds (UK)</li>
-      <li>MSc in Sustainability – University of São Paulo (USP, Brazil)</li>
-      <li>Former consultant for Hydroconseil (France) and the Inter-American Development Bank (IDB)</li>
-      <li>Former lecturer in Wastewater Treatment – National University of Callao (Peru)</li>
-      <li>10+ years of experience in water & sanitation projects across Latin America</li>
-    </ul>
-  </section>
+        impact_fig = px.bar(
+            df_impact, x='Barrier', y='Change',
+            color='Change', color_continuous_scale='RdBu',
+            title=f"Impact of Removing {barrier_removed} on Other Barriers"
+        )
+        impact_fig.update_layout(yaxis_tickformat=".0%")
+        impact_table = df_impact.rename(columns={
+            'Composite_Score_original': 'Original',
+            'Composite_Score_new': 'New'
+        }).to_dict('records')
 
-  <section>
-    <h2>Research Focus (PhD)</h2>
-    <p><strong>Project Title:</strong><br>
-    Multi-objective Optimization of Wastewater Treatment Plants Using Reinforcement Learning: A Simulation-Based and Sustainability-Oriented Approach.
-    </p>
-    <p>
-      Applying AI (Reinforcement Learning) to improve energy efficiency, effluent quality, and reduce emissions in WWTPs — especially in developing countries.
-    </p>
-  </section>
+        removed_score = df[df['Barrier'] == barrier_removed]['Composite_Score'].values[0]
+        sim_summary = [
+            html.H6(f"Simulation: Removal of {barrier_removed}", className="font-weight-bold"),
+            html.P(f"Original score: {removed_score:.3f}"),
+            html.P(f"Highest increase: {df_impact['Change'].max():.1%}"),
+            html.P(f"Largest decrease: {df_impact['Change'].min():.1%}")
+        ]
 
-  <section>
-  <h2>Featured Projects</h2>
-  <ul>
-    <li>
-      <strong>
-        <a href="https://github.com/erickcori/RL-ETAR-BSM1" target="_blank">RL-ETAR-BSM1</a>
-      </strong> 
-      – Optimization of wastewater plants using Reinforcement Learning
-    </li>
-    <li>
-      <strong>
-        <a href="https://github.com/erickcori/WQI" target="_blank">WQI</a>
-      </strong> 
-      – Water Quality Index for Indian rivers
-    </li>
-    <li>
-      <strong>
-        <a href="https://github.com/erickcori/Pytorch-Tutorial-" target="_blank">Pytorch-Tutorial</a>
-      </strong> 
-      – Neural network experiments
-    </li>
-    <li>
-      <strong>
-        <a href="https://github.com/erickcori/erickcori-portfolio" target="_blank">erickcori-portfolio</a>
-      </strong> 
-      – This portfolio and landing page
-    </li>
-  </ul>
-</section>
+    else:
+        impact_fig = go.Figure()
+        impact_fig.update_layout(
+            title="Select a barrier to simulate its removal",
+            xaxis={'visible': False},
+            yaxis={'visible': False},
+            plot_bgcolor='rgba(240,240,240,0.8)'
+        )
+        impact_table = []
+        sim_summary = html.P("Select a barrier to simulate its impact on the system.")
 
-  <section>
-    <h2>Research Interests</h2>
-    <ul>
-      <li>Wastewater treatment technologies</li>
-      <li>Reinforcement learning for environmental applications</li>
-      <li>Multi-objective optimization</li>
-      <li>Sustainability and resilient infrastructure</li>
-      <li>Public water and sanitation systems</li>
-    </ul>
-  </section>
+    # Descripción de clusters
+    cluster_desc = [
+        html.H6("Cluster Description", className="font-weight-bold"),
+        html.P([
+            html.Span("● ", style={'color': colors[0], 'fontWeight': 'bold'}),
+            html.Span("Structural Enablers: ", style={'color': colors[0], 'fontWeight': 'bold'}),
+            "Core barriers with high systemic influence and centrality."
+        ], className="mt-2"),
+        html.P([
+            html.Span("● ", style={'color': colors[1], 'fontWeight': 'bold'}),
+            html.Span("Peripheral Triggers: ", style={'color': colors[1], 'fontWeight': 'bold'}),
+            "Barriers with more localized but potentially disruptive effects."
+        ], className="mt-2"),
+        html.P([
+            html.Span("● ", style={'color': colors[2], 'fontWeight': 'bold'}),
+            html.Span("Context-Dependent Obstacles: ", style={'color': colors[2], 'fontWeight': 'bold'}),
+            "Barriers whose importance varies by scenario context."
+        ], className="mt-2")
+    ]
 
-  <section>
-    <h2>How to Reach Me</h2>
-    <ul>
-      <li>ORCID: <a href="https://orcid.org/0000-0003-0193-9514" target="_blank">0000-0003-0193-9514</a></li>
-      <li>LinkedIn: <a href="https://www.linkedin.com/in/mcorimanya" target="_blank">mcorimanya</a></li>
-      <li>Email: <a href="mailto:erickcorimanya2020@gmail.com">erickcorimanya2020@gmail.com</a></li>
-      <li>Location: São Paulo, Brazil</li>
-    </ul>
-    <p>Thanks for visiting! Feel free to explore my work or reach out for collaborations in environmental research, sustainability, or digital solutions for water systems.</p>
-  </section>
-</body>
-</html>
+    return (
+        df_sorted.to_dict('records'),
+        pca_fig,
+        impact_fig,
+        impact_table,
+        sim_summary,
+        cluster_desc
+    )
+
+# ========== EJECUCIÓN ==========
+if __name__ == '__main__':
+    app.run_server(debug=False)
